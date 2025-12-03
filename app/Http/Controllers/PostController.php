@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Post;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 use \Illuminate\Support\Str;
 
@@ -14,7 +15,10 @@ class PostController extends Controller
      */
     public function index()
     {
-        return Inertia::render('posts/index');
+        $posts = Auth::user()->posts()->latest()->get();
+        return Inertia::render('posts/index', [
+            "posts" => $posts
+        ]);
     }
 
     /**
