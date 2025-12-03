@@ -1,11 +1,13 @@
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
-import { Head, Link } from '@inertiajs/react';
+import { Head, Link, usePage } from '@inertiajs/react';
 import { Search } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Table, TableBody, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { useEffect } from 'react';
+import { toast } from 'sonner';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -15,6 +17,17 @@ const breadcrumbs: BreadcrumbItem[] = [
 ];
 
 export default function Posts() {
+
+    const {flash} = usePage<{flash: {message?: string} }>().props;
+
+    useEffect(() => {
+        if (flash.message) {
+            toast.success(flash.message, {
+                id: flash.message
+            });
+        }
+    }, [flash.message]);
+
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Posts" />

@@ -42,17 +42,23 @@ class PostController extends Controller
         $uniqueFileName = uniqid() . '_' . $file->getClientOriginalName();
         $filePath = $file->storeAs('posts', $uniqueFileName, 'public');
 
-        Post::create([
+        $slug = Str::slug($request->title);
+        $slugExists = Post::where('slug', $slug)->exists();
+        if ($slugExists) {
+            $slug .= '-' . uniqid();
+        }
+
+        $post = Post::create([
             "user_id" => auth()->id(),
             "title" => $request->title,
-            "slug" => Str::slug($request->title),
+            "slug" => Str::slug($slug),
             "content" => $request->input('content'),
             "status" => $request->status,
             "category" => $request->category,
             "image" => $filePath,
         ]);
 
-        return redirect()->route('posts.index')->with('success', 'Post created; successfully.');
+        return redirect()->route('posts.index')->with('message', 'Post created; successfully.');
 
     }
 

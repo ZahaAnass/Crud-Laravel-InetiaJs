@@ -26,12 +26,14 @@ const breadcrumbs: BreadcrumbItem[] = [
 export default function Posts() {
     const { data, setData, post, errors, processing } = useForm<{
         title: string;
+        slug: string;
         category: string;
         status: string;
         content: string;
         image: File | null;
     }>({
         title: '',
+        slug: '',
         category: '',
         status: '',
         content: '',
