@@ -13,6 +13,8 @@ import { Textarea } from '@/components/ui/textarea';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
 import { Head, Link, useForm } from '@inertiajs/react';
+import { Loader2 } from 'lucide-react';
+import InputError from '@/components/input-error';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -36,6 +38,11 @@ export default function Posts() {
         image: null,
     });
 
+    const handleFormSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        post('/posts');
+    }
+
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Create Posts" />
@@ -56,7 +63,7 @@ export default function Posts() {
 
                 <Card>
                     <CardContent>
-                        <form>
+                        <form onSubmit={handleFormSubmit}>
                             <div className={'grid grid-cols-2 gap-4'}>
                                 <div className={'col-span-2'}>
                                     <Label htmlFor={'title'}>Title</Label>
@@ -64,33 +71,52 @@ export default function Posts() {
                                         type={'text'}
                                         placeholder={'Title'}
                                         id={'title'}
+                                        value={data.title}
+                                        onChange={(e) =>
+                                            setData('title', e.target.value)
+                                        }
+                                        aria-invalid={!!errors.title}
                                     />
+                                    <InputError message={errors.title}/>
                                 </div>
                                 <div className={'col-span-2 md:col-span-1'}>
                                     <Label htmlFor={'category'}>Category</Label>
-                                    <Select>
+                                    <Select
+                                        value={data.category}
+                                        onValueChange={(value) =>
+                                            setData('category', value)
+                                        }
+                                    >
                                         <SelectTrigger
                                             id="category"
                                             className="w-full"
+                                            aria-invalid={!!errors.category}
                                         >
                                             <SelectValue placeholder="Select Category" />
                                         </SelectTrigger>
                                         <SelectContent>
-                                            <SelectItem value="Light">
-                                                Light
+                                            <SelectItem value="marvel">
+                                                Marvel
                                             </SelectItem>
-                                            <SelectItem value="Dark">
-                                                Dark
+                                            <SelectItem value="dc">
+                                                DC
                                             </SelectItem>
                                         </SelectContent>
                                     </Select>
+                                    <InputError message={errors.category}/>
                                 </div>
                                 <div className={'col-span-2 md:col-span-1'}>
                                     <Label htmlFor={'status'}>Status</Label>
-                                    <Select>
+                                    <Select
+                                        value={data.status}
+                                        onValueChange={(value) =>
+                                            setData('status', value)
+                                        }
+                                    >
                                         <SelectTrigger
                                             id={'status'}
                                             className={'w-full'}
+                                            aria-invalid={!!errors.status}
                                         >
                                             <SelectValue placeholder="Select Status" />
                                         </SelectTrigger>
@@ -103,6 +129,7 @@ export default function Posts() {
                                             </SelectItem>
                                         </SelectContent>
                                     </Select>
+                                    <InputError message={errors.status}/>
                                 </div>
                                 <div className={'col-span-2'}>
                                     <Label htmlFor={'content'}>Title</Label>
@@ -110,17 +137,40 @@ export default function Posts() {
                                         rows={6}
                                         id={'content'}
                                         placeholder={'Type content here...'}
+                                        value={data.content}
+                                        onChange={(e) =>
+                                            setData('content', e.target.value)
+                                        }
+                                        aria-invalid={!!errors.content}
                                     />
+                                    <InputError message={errors.content}/>
                                 </div>
                                 <div className={'col-span-2'}>
                                     <Label htmlFor={'image'}>
                                         Select Image
                                     </Label>
-                                    <Input type={'file'} id={'image'} />
+                                    <Input
+                                        type={'file'}
+                                        id={'image'}
+                                        onChange={(e) => {
+                                            const file = e.target.files?.[0];
+                                            if (file) {
+                                                setData('image', file);
+                                            }
+                                        }}
+                                        aria-invalid={!!errors.image}
+                                    />
+                                    <InputError message={errors.image}/>
+                                    {data.image &&
+                                        <img src={URL.createObjectURL(data.image)} alt="Preview" className="mt-2 h-32 w-32 object-cover rounded-lg" />
+                                    }
                                 </div>
                             </div>
                             <div className={'mt-4 text-end'}>
-                                <Button type={'submit'}>Create Post</Button>
+                                <Button type={'submit'} disabled={processing} size={"lg"}>
+                                    {processing && <Loader2 className={"animate-spin"} />}
+                                    Create Post
+                                </Button>
                             </div>
                         </form>
                     </CardContent>
