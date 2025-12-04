@@ -12,6 +12,7 @@ import { Badge } from '@/components/ui/badge';
 import { debounce } from 'lodash';
 import PostsType from '@/models/posts';
 import InertiaPagination from '@/components/inertia-pagination';
+import DeleteDialog from '@/components/delete-dialog';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -36,10 +37,8 @@ export default function Posts({posts}: {posts: PostsType}) {
     }
 
     function deletePost(id: number) {
-        if (confirm("Are you sure you want to delete this post?")) {
-            router.delete(`/posts/${id}`);
-            toast.success("Post deleted successfully");
-        }
+        router.delete(`/posts/${id}`);
+        toast.success("Post deleted successfully");
     }
 
     useEffect(() => {
@@ -86,8 +85,8 @@ export default function Posts({posts}: {posts: PostsType}) {
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
-                                {posts.data?.map((post, index) => {
-                                    return (
+                                {posts.data && posts.data.length > 0 ? (
+                                    posts.data.map((post, index) => (
                                         <TableRow key={index}>
                                             <TableCell>{index + 1}</TableCell>
                                             <TableCell>
@@ -99,31 +98,40 @@ export default function Posts({posts}: {posts: PostsType}) {
                                                     />
                                                 )}
                                             </TableCell>
+                                            <TableCell>{post.title.substring(0, 20)}</TableCell>
+                                            <TableCell>{post.content.substring(0, 50)}</TableCell>
+                                            <TableCell>{post.category}</TableCell>
                                             <TableCell>
-                                                {post.title.substring(20, 0)}
+                                                {post.status == '0' ? (
+                                                    <Badge className="bg-red-500">Inactive</Badge>
+                                                ) : (
+                                                    <Badge className="bg-green-500">Active</Badge>
+                                                )}
                                             </TableCell>
-                                            <TableCell>
-                                                {post.content.substring(50, 0)}
-                                            </TableCell>
-                                            <TableCell>
-                                                {post.category}
-                                            </TableCell>
-                                            <TableCell>
-                                                {post.status == '0' ? (<Badge className={"bg-red-500"}>Inactive</Badge>) : (<Badge className={"bg-green-500"}>Active</Badge>)}
-                                            </TableCell>
-                                            <TableCell className={"space-x-1.5"}>
-                                                <Button asChild size={"sm"}>
+                                            <TableCell className="space-x-1.5">
+                                                <Button asChild size="sm">
                                                     <Link href={`/posts/${post.id}/edit`} prefetch>
                                                         Edit
                                                     </Link>
                                                 </Button>
-                                                <Button onClick={() => deletePost(post.id)} size={"sm"} variant={"destructive"}>
-                                                    Delete
-                                                </Button>
+                                                <DeleteDialog onConfirm={() => deletePost(post.id)}>
+                                                    <Button size="sm" variant="destructive">
+                                                        Delete
+                                                    </Button>
+                                                </DeleteDialog>
                                             </TableCell>
                                         </TableRow>
-                                    )
-                                })}
+                                    ))
+                                ) : (
+                                    <TableRow>
+                                        <TableCell
+                                            colSpan={7}
+                                            className="text-center py-6 text-muted-foreground"
+                                        >
+                                            No posts found.
+                                        </TableCell>
+                                    </TableRow>
+                                )}
                             </TableBody>
                         </Table>
                     </CardContent>

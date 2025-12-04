@@ -23,7 +23,13 @@ function InertiaPagination({posts}: {posts: PostType}) {
             }
         >
             <div>
-                {posts.from} - {posts.to} of {posts.total}
+                {/*{posts.from} - {posts.to} of {posts.total}*/}
+                {posts.total >= 1 ? (
+                    <span>Showing {posts.from} to {posts.to} of {posts.total} results</span>
+                    ) : (
+                        <span>No results found</span>
+                    )
+                }
             </div>
             <div className={"flex flex-wrap items-center justify-center gap-2"}>
                 {posts.links.map((link, index) => {

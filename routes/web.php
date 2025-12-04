@@ -12,12 +12,11 @@ Route::get('/', function () {
 })->name('home');
 
 Route::middleware(['auth', 'verified'])->group(function () {
-    Route::get('dashboard', function () {
-        return Inertia::render('dashboard');
-    })->name('dashboard');
-
     Route::resource("posts", PostController::class);
 
+    Route::get('dashboard', function () {
+        return redirect()->route('posts.index');
+    })->name('dashboard');
 });
 
 require __DIR__.'/settings.php';
