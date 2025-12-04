@@ -83,7 +83,9 @@ class PostController extends Controller
      */
     public function edit(Post $post)
     {
-        //
+        return Inertia::render('posts/edit', [
+            "postData" => $post,
+        ]);
     }
 
     /**
@@ -91,7 +93,37 @@ class PostController extends Controller
      */
     public function update(Request $request, Post $post)
     {
-        //
+        $request->validate([
+            "title" => "required|string|max:255",
+            "content" => "required|string",
+            "status" => "required|string",
+            "category" => "required|string",
+            "image" => "nullable|image|max:8064",
+        ]);
+
+        if ($request->hasFile('image')) {
+            $file = $request->file('image');
+            $uniqueFileName = uniqid() . '_' . $file->getClientOriginalName();
+            $filePath = $file->storeAs('posts', $uniqueFileName, 'public');
+            $post->image = $filePath;
+        }
+
+        $slug = Str::slug($request->title);
+        if ($slug !== $post->slug) {
+            $slugExists = Post::where('slug', $slug)->where('id', '!=', $post->id)->exists();
+            if ($slugExists) {
+                $slug .= '-' . uniqid();
+            }
+            $post->slug = $slug;
+        }
+
+        $post->title = $request->title;
+        $post->content = $request->input('content');
+        $post->status = $request->status;
+        $post->category = $request->category;
+        $post->save();
+
+        return redirect()->route('posts.index')->with('message', 'Post updated successfully.');
     }
 
     /**

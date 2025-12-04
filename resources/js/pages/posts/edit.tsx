@@ -12,35 +12,40 @@ import {
 import { Textarea } from '@/components/ui/textarea';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
-import { Head, Link, useForm } from '@inertiajs/react';
+import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
 import { Loader2 } from 'lucide-react';
 import InputError from '@/components/input-error';
+import PostType from '@/models/post';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
-        title: 'Create Posts',
-        href: '/posts/create',
+        title: 'Edit Posts',
+        href: '/posts/',
     },
 ];
 
-export default function Posts() {
-    const { data, setData, post, errors, processing } = useForm<{
+export default function EditPosts({postData}: {postData: PostType}) {
+    const { data, setData, post, processing } = useForm<{
         title: string;
         category: string;
         status: string;
         content: string;
         image: File | null;
     }>({
-        title: '',
-        category: '',
-        status: '',
-        content: '',
+        title: postData.title,
+        category: postData.category,
+        status: postData.status.toString(),
+        content: postData.content,
         image: null,
     });
 
+    const {errors} = usePage().props;
+
     const handleFormSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        post('/posts');
+        router.put(`/posts/${postData.id}`, {
+            ...data,
+        })
     }
 
     return (
@@ -50,7 +55,7 @@ export default function Posts() {
                 <div className="rounded border p-6 shadow-xl">
                     <div className={'flex items-center justify-between'}>
                         <div className="text-xl text-slate-400">
-                            Create Post
+                            Edit Post
                         </div>
 
                         <Button>
@@ -108,7 +113,7 @@ export default function Posts() {
                                 <div className={'col-span-2 md:col-span-1'}>
                                     <Label htmlFor={'status'}>Status</Label>
                                     <Select
-                                        value={data.status}
+                                        value={data.status == "1" ? "1" : "0"}
                                         onValueChange={(value) =>
                                             setData('status', value)
                                         }
@@ -118,7 +123,7 @@ export default function Posts() {
                                             className={'w-full'}
                                             aria-invalid={!!errors.status}
                                         >
-                                            <SelectValue placeholder="Select Status" />
+                                            <SelectValue>{data.status == "1" ? "Published" : "Inactive"}</SelectValue>
                                         </SelectTrigger>
                                         <SelectContent>
                                             <SelectItem value="1">
@@ -163,6 +168,9 @@ export default function Posts() {
                                     <InputError message={errors.image}/>
                                     {data.image &&
                                         <img src={URL.createObjectURL(data.image)} alt="Preview" className="mt-2 h-32 w-32 object-cover rounded-lg" />
+                                    }
+                                    {!data.image && postData.image &&
+                                        <img src={`/storage/${postData.image}`} alt="Current" className="mt-2 h-32 w-32 object-cover rounded-lg" />
                                     }
                                 </div>
                             </div>
