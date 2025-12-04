@@ -29,9 +29,17 @@ export default function Posts({posts}: {posts: PostsType}) {
             router.get("/posts", { search: query }, { preserveState: true, replace: true });
         }, 500)
     ).current;
+
     const onSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const query = e.target.value;
         handleSearch(query);
+    }
+
+    function deletePost(id: number) {
+        if (confirm("Are you sure you want to delete this post?")) {
+            router.delete(`/posts/${id}`);
+            toast.success("Post deleted successfully");
+        }
     }
 
     useEffect(() => {
@@ -109,7 +117,7 @@ export default function Posts({posts}: {posts: PostsType}) {
                                                         Edit
                                                     </Link>
                                                 </Button>
-                                                <Button size={"sm"} variant={"destructive"}>
+                                                <Button onClick={() => deletePost(post.id)} size={"sm"} variant={"destructive"}>
                                                     Delete
                                                 </Button>
                                             </TableCell>
