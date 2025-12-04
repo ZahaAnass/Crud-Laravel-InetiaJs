@@ -13,9 +13,13 @@ class PostController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $posts = Auth::user()->posts()->latest()->get();
+        $query = Auth::user()->posts()->latest();
+        if ($request->has("search") && $request->search !== null) {
+            $query->whereAny(["title", "content"], "like", "%" . $request->search . "%");
+        }
+        $posts = $query->paginate(5)->withQueryString();
         return Inertia::render('posts/index', [
             "posts" => $posts
         ]);

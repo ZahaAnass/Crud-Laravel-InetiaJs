@@ -1,6 +1,6 @@
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
-import { Head, Link, usePage } from '@inertiajs/react';
+import { Head, Link, router, usePage } from '@inertiajs/react';
 import { Search } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -8,8 +8,10 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useEffect, useRef } from 'react';
 import { toast } from 'sonner';
-import PostType from '@/models/post';
 import { Badge } from '@/components/ui/badge';
+import { debounce } from 'lodash';
+import PostsType from '@/models/posts';
+import InertiaPagination from '@/components/inertia-pagination';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -18,13 +20,15 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
-export default function Posts({posts}: {posts: PostType[]}) {
+export default function Posts({posts}: {posts: PostsType}) {
 
     const {flash} = usePage<{flash: {message?: string} }>().props;
 
-    const onSearchChange = useRef(
-
-    )
+    const handleSearch = useRef(
+        debounce((query: string) => {
+            router.get("/posts", { search: query }, { preserveState: true, replace: true });
+        }, 500)
+    ).current;
     const onSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const query = e.target.value;
         handleSearch(query);
@@ -74,7 +78,7 @@ export default function Posts({posts}: {posts: PostType[]}) {
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
-                                {posts.map((post, index) => {
+                                {posts.data?.map((post, index) => {
                                     return (
                                         <TableRow key={index}>
                                             <TableCell>{index + 1}</TableCell>
@@ -115,8 +119,8 @@ export default function Posts({posts}: {posts: PostType[]}) {
                             </TableBody>
                         </Table>
                     </CardContent>
+                    <InertiaPagination posts={posts} />
                 </Card>
-
             </div>
         </AppLayout>
     );
